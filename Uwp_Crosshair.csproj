@@ -132,6 +132,12 @@
   <ItemGroup>
     <Content Include="Assets\Crosshair001.png" />
     <Content Include="Assets\WebCrosshair.html" />
+    <Content Include="ExtensionCrosshair\Icons\icon.targetsize-16.png" />
+    <Content Include="ExtensionCrosshair\Icons\icon.targetsize-20.png" />
+    <Content Include="ExtensionCrosshair\Icons\icon.targetsize-24.png" />
+    <Content Include="ExtensionCrosshair\Icons\icon.targetsize-256.png" />
+    <Content Include="ExtensionCrosshair\Icons\icon.targetsize-32.png" />
+    <Content Include="ExtensionCrosshair\Icons\icon.targetsize-44.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
