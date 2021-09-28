@@ -6,9 +6,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="Transparent">
+    Background="Transparent"
+    Loaded="Page_Loaded">
 
     <Grid>
         <WebView DefaultBackgroundColor="Transparent" Source="ms-appx-web:///Assets/WebCrosshair.html"></WebView>
+        <Grid Background="Transparent"></Grid>
     </Grid>
 </Page>

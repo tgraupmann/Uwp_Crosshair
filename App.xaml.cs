@@ -17,6 +17,9 @@ namespace Uwp_Crosshair
     {
         private XboxGameBarWidget _mXboxGameBarWidget = null;
 
+        // Detect mouse events and don't handle
+        private IntPtr _mOldWndProc;
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -86,7 +89,13 @@ namespace Uwp_Crosshair
                                 rootFrame);
 
                             rootFrame.Navigate(typeof(MainPage), _mXboxGameBarWidget);
-                            break;                        
+
+                            // We could probably do this a little earlier, but we need to wait
+                            // for the CoreWindow to be ready so can get its HWND, and this is
+                            // Good Enough(tm).
+                            _mOldWndProc = Interop.SetWndProc(WindowProcess);
+
+                            break;
                         default:
                             // Unknown - Game Bar should never send you an unknown App Extension Id
                             return;
@@ -180,6 +189,34 @@ namespace Uwp_Crosshair
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        IntPtr _mReturnIgnore = IntPtr.Zero;
+
+        private IntPtr WindowProcess(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam)
+        {
+            switch ((WM)message)
+            {
+                case WM.SETCURSOR:
+                case WM.MOUSEACTIVATE:
+                case WM.MOUSEFIRST:
+                case WM.MOUSEHOVER:
+                case WM.MOUSEHWHEEL:
+                case WM.MOUSELEAVE:
+                case WM.MOUSEWHEEL:
+                case (WM)581: //mouse over
+                case (WM)582: //mouse click
+                case (WM)583: //mouse click
+                case (WM)586: //mouse exit
+                case (WM)590: //mouse scroll
+                    IntPtr foregroundWindow = Interop.GetForegroundWindow();
+                    Interop.SendMessage(foregroundWindow, message, wParam, lParam);
+                    Interop.DefWindowProc(hwnd, message, wParam, lParam);
+                    break;
+            }
+
+            // Call the "base" WndProc
+            return Interop.CallWindowProc(_mOldWndProc, hwnd, message, wParam, lParam);
         }
     }
 }
