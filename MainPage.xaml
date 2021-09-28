@@ -10,5 +10,6 @@
 
     <Grid>
         <WebView DefaultBackgroundColor="Transparent" Source="ms-appx-web:///Assets/WebCrosshair.html"></WebView>
+        <Grid Background="Transparent"></Grid>
     </Grid>
 </Page>
