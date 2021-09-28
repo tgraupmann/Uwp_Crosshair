@@ -209,12 +209,11 @@ namespace Uwp_Crosshair
                 case (WM)583: //mouse click
                 case (WM)586: //mouse exit
                 case (WM)590: //mouse scroll
+                    IntPtr foregroundWindow = Interop.GetForegroundWindow();
+                    Interop.SendMessage(foregroundWindow, message, wParam, lParam);
+                    Interop.DefWindowProc(hwnd, message, wParam, lParam);
                     break;
             }
-
-            IntPtr foregroundWindow = Interop.GetForegroundWindow();
-            Interop.SendMessage(foregroundWindow, message, wParam, lParam);
-            return Interop.DefWindowProc(hwnd, message, wParam, lParam);
 
             // Call the "base" WndProc
             return Interop.CallWindowProc(_mOldWndProc, hwnd, message, wParam, lParam);
