@@ -9,7 +9,7 @@
 
   <Identity
     Name="77c20ee4-d513-4692-997d-54db904eeec2"
-    Publisher="CN=timot"
+    Publisher="CN=Timothy A. Graupmann"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="77c20ee4-d513-4692-997d-54db904eeec2" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
