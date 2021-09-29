@@ -1,5 +1,6 @@
 ﻿using Microsoft.Gaming.XboxGameBar;
 using System;
+using System.Runtime.InteropServices;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -17,6 +18,8 @@ namespace Uwp_Crosshair
     {
         private XboxGameBarWidget _mXboxGameBarWidget = null;
 
+        IntPtr _mReturnHandledTrue;
+
         // Detect mouse events and don't handle
         private IntPtr _mOldWndProc;
 
@@ -28,6 +31,11 @@ namespace Uwp_Crosshair
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+
+            int size = Marshal.SizeOf<Int32>();
+            _mReturnHandledTrue = Marshal.AllocHGlobal(size);
+            Marshal.WriteInt32(_mReturnHandledTrue, 0, 1);  // last parameter 0 (FALSE), 1 (TRUE)
+
         }
 
         /// <summary>
@@ -209,10 +217,12 @@ namespace Uwp_Crosshair
                 case (WM)583: //mouse click
                 case (WM)586: //mouse exit
                 case (WM)590: //mouse scroll
-                    IntPtr foregroundWindow = Interop.GetForegroundWindow();
-                    Interop.SendMessage(foregroundWindow, message, wParam, lParam);
-                    Interop.DefWindowProc(hwnd, message, wParam, lParam);
-                    break;
+                    {
+                        IntPtr foregroundWindow = Interop.GetForegroundWindow();
+                        Interop.SendMessage(foregroundWindow, message, wParam, lParam);
+                        Interop.DefWindowProc(hwnd, message, wParam, lParam);
+                        return _mReturnHandledTrue;
+                    }
             }
 
             // Call the "base" WndProc
