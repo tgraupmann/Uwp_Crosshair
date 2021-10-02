@@ -27,26 +27,7 @@ public class Interop
     [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")] // 64-bit
     public static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
-    private const int GWLP_WNDPROC = -4;
     public delegate IntPtr WndProcDelegate(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
-
-    public static IntPtr SetWndProc(WndProcDelegate newProc)
-    {
-        dynamic coreWindow = Windows.UI.Core.CoreWindow.GetForCurrentThread();
-        var interop = (ICoreWindowInterop)coreWindow;
-        var hwnd = interop.WindowHandle;
-
-        IntPtr functionPointer = Marshal.GetFunctionPointerForDelegate(newProc);
-
-        if (IntPtr.Size == 8)
-        {
-            return SetWindowLongPtr(hwnd, GWLP_WNDPROC, functionPointer);
-        }
-        else
-        {
-            return SetWindowLong(hwnd, GWLP_WNDPROC, functionPointer);
-        }
-    }
 
     [DllImport("user32.dll")]
     public static extern IntPtr GetForegroundWindow();
@@ -76,4 +57,20 @@ public class Interop
         }
         return null;
     }
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern long GetWindowLong(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern long SetWindowLongW(IntPtr hWnd, int nIndex, long style);
+
+    /// <summary>
+    /// Sets the last-error code for the calling thread.
+    /// </summary>
+    /// <param name="dwErrorCode">The last-error code for the thread.</param>
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern void SetLastError(uint dwErrorCode);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
 }
