@@ -1,7 +1,5 @@
 ﻿using Microsoft.Gaming.XboxGameBar;
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -9,7 +7,6 @@ using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using static Interop;
 
 namespace Uwp_Crosshair
 {
@@ -20,11 +17,6 @@ namespace Uwp_Crosshair
     {
         private XboxGameBarWidget _mXboxGameBarWidget = null;
 
-        IntPtr _mReturnHandledTrue;
-
-        // Detect mouse events and don't handle
-        private static IntPtr _sOldWndProc;
-
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -33,80 +25,6 @@ namespace Uwp_Crosshair
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
-
-            int size = Marshal.SizeOf<Int32>();
-            _mReturnHandledTrue = Marshal.AllocHGlobal(size);
-            Marshal.WriteInt32(_mReturnHandledTrue, 0, 1);  // last parameter 0 (FALSE), 1 (TRUE)
-
-        }
-
-        public static void EnableClickThroughStyle(IntPtr hwnd)
-        {
-            long style = Interop.GetWindowLong(hwnd, (int)GWL.GWL_EXSTYLE);
-            style |= WS.WS_EX_LAYERED;
-            style |= WS.WS_EX_TRANSPARENT;
-
-
-            // Set last error to 0 first per DMC page for SetWindowLongW 
-            Interop.SetLastError(0);
-            Interop.SetWindowLongW(hwnd, (int)GWL.GWL_EXSTYLE, style);
-        }
-
-        static void EnableClickThroughStyleAllChildren(IntPtr hParent, int maxCount)
-        {
-            int ct = 0;
-            IntPtr prevChild = IntPtr.Zero;
-            IntPtr currChild = IntPtr.Zero;
-            while (true && ct < maxCount)
-            {
-                currChild = Interop.FindWindowEx(hParent, prevChild, null, null);
-                if (currChild == IntPtr.Zero) break;
-
-                EnableClickThroughStyle(currChild);
-
-                prevChild = currChild;
-                ++ct;
-            }
-        }
-
-        public static void EnableClickThrough()
-        {
-            dynamic coreWindow = Windows.UI.Core.CoreWindow.GetForCurrentThread();
-            var interop = (ICoreWindowInterop)coreWindow;
-            var hwnd = interop.WindowHandle;
-
-            EnableClickThroughStyle(hwnd);
-            EnableClickThroughStyleAllChildren(hwnd, 100);
-        }
-
-        public static void DisableClickThroughStyle(IntPtr hwnd)
-        {
-            long style = Interop.GetWindowLong(hwnd, (int)GWL.GWL_EXSTYLE);
-            style &= ~WS.WS_EX_LAYERED;
-            style &= ~WS.WS_EX_TRANSPARENT;
-
-
-            // Set last error to 0 first per DMC page for SetWindowLongW 
-            Interop.SetLastError(0);
-            Interop.SetWindowLongW(hwnd, (int)GWL.GWL_EXSTYLE, style);
-        }
-
-        IntPtr SetWndProc(WndProcDelegate newProc)
-        {
-            dynamic coreWindow = Windows.UI.Core.CoreWindow.GetForCurrentThread();
-            var interop = (ICoreWindowInterop)coreWindow;
-            var hwnd = interop.WindowHandle;
-
-            IntPtr functionPointer = Marshal.GetFunctionPointerForDelegate(newProc);
-
-            if (IntPtr.Size == 8)
-            {
-                return SetWindowLongPtr(hwnd, (int)GWLP.GWLP_WNDPROC, functionPointer);
-            }
-            else
-            {
-                return SetWindowLong(hwnd, (int)GWLP.GWLP_WNDPROC, functionPointer);
-            }
         }
 
         /// <summary>
@@ -168,13 +86,7 @@ namespace Uwp_Crosshair
                                 rootFrame);
 
                             rootFrame.Navigate(typeof(MainPage), _mXboxGameBarWidget);
-
-                            // We could probably do this a little earlier, but we need to wait
-                            // for the CoreWindow to be ready so can get its HWND, and this is
-                            // Good Enough(tm).
-                            _sOldWndProc = SetWndProc(WindowProcess);
-
-                            break;
+                            break;                        
                         default:
                             // Unknown - Game Bar should never send you an unknown App Extension Id
                             return;
@@ -268,41 +180,6 @@ namespace Uwp_Crosshair
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
-        }
-
-        private static IntPtr WindowProcess(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam)
-        {
-            // not handled
-            //return Interop.DefWindowProc(hwnd, message, wParam, lParam);
-
-            switch ((WM)message)
-            {
-                case WM.SETCURSOR:
-                case WM.MOUSEACTIVATE:
-                case WM.MOUSEFIRST:
-                case WM.MOUSEHOVER:
-                case WM.MOUSEHWHEEL:
-                case WM.MOUSELEAVE:
-                case WM.MOUSEWHEEL:
-                case (WM)581: //mouse over
-                case (WM)582: //mouse click
-                case (WM)583: //mouse click
-                case (WM)586: //mouse exit
-                case (WM)590: //mouse scroll
-                    {
-                        // get the foreground window
-                        //IntPtr foregroundWindow = Interop.GetForegroundWindow();
-                        
-                        // pass event to foreground window
-                        //Interop.SendMessage(foregroundWindow, message, wParam, lParam);
-
-                        // not handled
-                        return Interop.DefWindowProc(hwnd, message, wParam, lParam);
-                    }
-            }
-
-            // Call the "base" WndProc
-            return Interop.CallWindowProc(_sOldWndProc, hwnd, message, wParam, lParam);
         }
     }
 }
