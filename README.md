@@ -10,7 +10,7 @@ This is an Xbox Game Bar project that has a widget with transparency to show a c
 
 ## Setup
 
-* Open Xbox Game Bar by pressing the `Windows Key` and `G` on the keyboard.
+* Open Xbox Game Bar by pressing the `Windows Key` and `G` on the keyboard
 
 * Enable `click-through` on menu bar
 
@@ -27,6 +27,8 @@ This is an Xbox Game Bar project that has a widget with transparency to show a c
 * Pin the `Crosshair Widget` so that it appears when the `Xbox Game Bar` overlay is dismissed
 
 ![image_4](images/image_4.png)
+
+* Reopen the `Xbox Game Bar` overlay to position and size the crosshair in the optimal place
 
 # Support
 
